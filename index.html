@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aperture — Focus, Attention &amp; Memory Training</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,500&family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="site-header">
+  <div class="logo">
+    <svg viewBox="0 0 40 40" fill="none">
+      <circle cx="20" cy="20" r="18" stroke="#D9A441" stroke-width="1.4"/>
+      <circle cx="20" cy="20" r="11" stroke="#D9A441" stroke-width="1.4" stroke-dasharray="3 4"/>
+      <circle cx="20" cy="20" r="3.2" fill="#D9A441"/>
+    </svg>
+    Aperture
+  </div>
+  <nav class="site-nav">
+    <a class="nav-link" href="#focus">Focus</a>
+    <a class="nav-link" href="#logic">Logic</a>
+    <a class="nav-link" href="#reflex">Reflex</a>
+    <a class="nav-link" href="#mind">Mind</a>
+  </nav>
+  <div class="header-actions">
+    <span class="streak-flame" id="streak-flame" hidden></span>
+    <button class="nav-btn" id="stats-link">Stats</button>
+    <button class="icon-btn" id="sound-toggle" aria-label="Toggle sound" title="Toggle sound"></button>
+    <button class="icon-btn js-theme" id="theme-toggle" aria-label="Toggle theme" title="Toggle theme"></button>
+  </div>
+</header>
+
+<main id="home-view">
+  <section class="hero">
+    <div>
+      <span class="eyebrow">Cognitive training · fourteen exercises</span>
+      <h1>Train the parts of your mind<br><em>that wander.</em></h1>
+      <p class="lede">Short reps for memory, attention, and reasoning — plus endlessly generated logic puzzles. No accounts, no once-a-day limit. Just a quiet place to sharpen your aim.</p>
+      <a href="#focus" class="cta">Begin a session</a>
+    </div>
+    <div class="hero-ring-wrap">
+      <svg class="hero-ring breathe" viewBox="0 0 240 240" fill="none">
+        <circle cx="120" cy="120" r="110" stroke="#333B57" stroke-width="1"/>
+        <circle class="spin-slow" cx="120" cy="120" r="92" stroke="#D9A441" stroke-width="1.2" stroke-dasharray="2 10" style="transform-origin:120px 120px;"/>
+        <circle cx="120" cy="120" r="74" stroke="#333B57" stroke-width="1"/>
+        <circle cx="120" cy="120" r="56" stroke="#7FA37A" stroke-width="1" stroke-dasharray="1 6"/>
+        <circle cx="120" cy="120" r="10" fill="#D9A441"/>
+      </svg>
+    </div>
+  </section>
+
+  <section id="focus" class="section">
+    <div class="section-head">
+      <div><h2>Focus &amp; Memory</h2></div>
+      <p>Five exercises built around attention and recall. Most take two to four minutes.</p>
+    </div>
+    <div class="card-grid">
+      <button class="chamber-card" data-game="match" style="--card-accent:#D9A441;">
+        <span class="chamber-tag">Memory</span><h3>Pair Match</h3>
+        <p>Flip tiles to uncover matching symbols. Fewer moves, sharper recall.</p>
+        <span class="chamber-meta">2-4 min · untimed</span>
+      </button>
+      <button class="chamber-card" data-game="sequence" style="--card-accent:#6E7FD0;">
+        <span class="chamber-tag">Attention</span><h3>Sequence Recall</h3>
+        <p>Watch the ring light up, then repeat the pattern. It grows by one each round.</p>
+        <span class="chamber-meta">1-5 min · escalating</span>
+      </button>
+      <button class="chamber-card" data-game="schulte" style="--card-accent:#7FA37A;">
+        <span class="chamber-tag">Attention</span><h3>Focus Grid</h3>
+        <p>Find 1 through 25 in order, as fast as you can, without losing your place.</p>
+        <span class="chamber-meta">~1 min · timed</span>
+      </button>
+      <button class="chamber-card" data-game="words" style="--card-accent:#C15B45;">
+        <span class="chamber-tag">Memory</span><h3>Word Recall</h3>
+        <p>Study a short list, wait through a pause, then pick out which words you saw.</p>
+        <span class="chamber-meta">~2 min · recognition</span>
+      </button>
+      <button class="chamber-card" data-game="quiz" style="--card-accent:#D9A441;">
+        <span class="chamber-tag">Knowledge</span><h3>General Knowledge</h3>
+        <p>Ten questions across science, history, geography, and art — each on a soft clock.</p>
+        <span class="chamber-meta">3-4 min · timed</span>
+      </button>
+      <button class="chamber-card" data-game="slide" style="--card-accent:#7C8CE0;">
+        <span class="chamber-tag">Spatial</span><h3>Slide Puzzle</h3>
+        <p>Shuffle the tiles back into order by sliding them into the gap. A spatial classic.</p>
+        <span class="chamber-meta">endless shuffles · timed</span>
+      </button>
+    </div>
+  </section>
+
+  <section id="logic" class="section">
+    <div class="section-head">
+      <div style="display:flex; align-items:center; gap:14px; flex-wrap:wrap;"><h2>Logic Puzzles</h2><span class="endless-badge">Endless · fresh every play</span></div>
+      <p>The daily puzzles you know from LinkedIn — but generated on demand, so you never run out.</p>
+    </div>
+    <div class="card-grid">
+      <button class="chamber-card" data-game="tango" style="--card-accent:#D9A441;">
+        <span class="chamber-tag">Logic</span><h3>Tango</h3>
+        <p>Fill the grid with suns and moons. Balance each row and column; never three in a row.</p>
+        <span class="chamber-meta">6x6 · unique solution</span>
+      </button>
+      <button class="chamber-card" data-game="queens" style="--card-accent:#B57BA6;">
+        <span class="chamber-tag">Logic</span><h3>Queens</h3>
+        <p>Place one crown per row, column, and color region — and never let two touch.</p>
+        <span class="chamber-meta">8x8 · unique solution</span>
+      </button>
+      <button class="chamber-card" data-game="zip" style="--card-accent:#4F9DAE;">
+        <span class="chamber-tag">Logic</span><h3>Zip</h3>
+        <p>Draw one path that passes the numbers in order and fills every single cell.</p>
+        <span class="chamber-meta">6x6 · drag to draw</span>
+      </button>
+      <button class="chamber-card" data-game="sudoku" style="--card-accent:#7FA37A;">
+        <span class="chamber-tag">Logic</span><h3>Mini Sudoku</h3>
+        <p>A compact 6x6 sudoku. Each row, column, and box holds 1 through 6 exactly once.</p>
+        <span class="chamber-meta">6x6 · unique solution</span>
+      </button>
+      <button class="chamber-card" data-game="pinpoint" style="--card-accent:#C15B45;">
+        <span class="chamber-tag">Knowledge</span><h3>Pinpoint</h3>
+        <p>Guess the hidden category from a trickle of clues. The sooner you see it, the better.</p>
+        <span class="chamber-meta">deductive · fewer clues wins</span>
+      </button>
+      <button class="chamber-card" data-game="lights" style="--card-accent:#E0A43A;">
+        <span class="chamber-tag">Logic</span><h3>Lights Out</h3>
+        <p>Every tap flips a light and its neighbors. Darken the whole glowing board.</p>
+        <span class="chamber-meta">always solvable · fewest taps</span>
+      </button>
+    </div>
+  </section>
+
+  <section id="reflex" class="section">
+    <div class="section-head">
+      <div><h2>Reflex &amp; Perception</h2></div>
+      <p>Fast, colorful drills for reaction speed, visual search, and working memory.</p>
+    </div>
+    <div class="card-grid">
+      <button class="chamber-card" data-game="reaction" style="--card-accent:#7FA37A;">
+        <span class="chamber-tag">Reflex</span><h3>Reaction Time</h3>
+        <p>Wait for green, then tap as fast as you can. Five trials, averaged in milliseconds.</p>
+        <span class="chamber-meta">~30 sec · reflex</span>
+      </button>
+      <button class="chamber-card" data-game="stroop" style="--card-accent:#6E7FD0;">
+        <span class="chamber-tag">Attention</span><h3>Color Clash</h3>
+        <p>Tap the ink color, not the word. Beat your instincts for 30 focused seconds.</p>
+        <span class="chamber-meta">30 sec · inhibition</span>
+      </button>
+      <button class="chamber-card" data-game="odd" style="--card-accent:#D9A441;">
+        <span class="chamber-tag">Perception</span><h3>Odd One Out</h3>
+        <p>Spot the single tile with a slightly different shade. It gets subtler each time.</p>
+        <span class="chamber-meta">45 sec · visual search</span>
+      </button>
+      <button class="chamber-card" data-game="chimp" style="--card-accent:#C15B45;">
+        <span class="chamber-tag">Memory</span><h3>Chimp Test</h3>
+        <p>Memorize where the numbers sit, then tap them in order once they vanish.</p>
+        <span class="chamber-meta">working memory · escalating</span>
+      </button>
+      <button class="chamber-card" data-game="target" style="--card-accent:#E8734F;">
+        <span class="chamber-tag">Reflex</span><h3>Target Rush</h3>
+        <p>Targets pop up and vanish fast — tap them, dodge the decoys, chain the combo.</p>
+        <span class="chamber-meta">30 sec · arcade</span>
+      </button>
+      <button class="chamber-card" data-game="flood" style="--card-accent:#33A8C0;">
+        <span class="chamber-tag">Strategy</span><h3>Color Flood</h3>
+        <p>Flood the board one color at a time from the corner. Paint it all before moves run out.</p>
+        <span class="chamber-meta">beat the par · colorful chaos</span>
+      </button>
+    </div>
+  </section>
+
+  <section id="mind" class="section">
+    <div class="section-head">
+      <div><h2>Mind Benders</h2></div>
+      <p>Personality, psychology, and puzzles built to outwit your first instinct.</p>
+    </div>
+    <div class="card-grid">
+      <button class="chamber-card" data-game="cogstyle" style="--card-accent:#B072C0;">
+        <span class="chamber-tag">Personality</span><h3>Cognitive Style</h3>
+        <p>Eight quick choices sketch how your mind likes to work. No right answers, just you.</p>
+        <span class="chamber-meta">~2 min · profile</span>
+      </button>
+      <button class="chamber-card" data-game="crt" style="--card-accent:#33A8C0;">
+        <span class="chamber-tag">Reasoning</span><h3>Cognitive Reflection</h3>
+        <p>Simple-looking questions with a tempting wrong answer. Beat the obvious.</p>
+        <span class="chamber-meta">trick questions · reveal</span>
+      </button>
+      <button class="chamber-card" data-game="nback" style="--card-accent:#E8734F;">
+        <span class="chamber-tag">Working memory</span><h3>N-Back</h3>
+        <p>A tile jumps around the grid. Flag it when the spot matches two steps back.</p>
+        <span class="chamber-meta">2-back · concentration</span>
+      </button>
+      <button class="chamber-card" data-game="mathsprint" style="--card-accent:#B072C0;">
+        <span class="chamber-tag">Mental math</span><h3>Math Sprint</h3>
+        <p>Rapid-fire arithmetic against the clock. Chain right answers into combos.</p>
+        <span class="chamber-meta">45 sec · quick-fire</span>
+      </button>
+    </div>
+  </section>
+
+  <footer>
+    <p class="quote">"Attention is the rarest and purest form of generosity."</p>
+    <p>— Simone Weil · Aperture is a small training ground, not a substitute for professional care.</p>
+  </footer>
+</main>
+
+<section id="game-view" class="game-view" hidden>
+  <div class="game-bar">
+    <div class="bar-left">
+      <button class="bar-back" id="back-btn"><span class="chev">‹</span> <span class="bar-back-label">Chambers</span></button>
+      <span class="bar-sep">/</span>
+      <span class="game-title" id="game-title"></span>
+    </div>
+    <div class="game-stat" id="game-stat"></div>
+  </div>
+  <div id="game-stage" class="game-stage"></div>
+</section>
+
+<section id="stats-view" class="game-view" hidden>
+  <div class="game-bar">
+    <div class="bar-left">
+      <button class="bar-back" id="stats-back"><span class="chev">‹</span> <span class="bar-back-label">Chambers</span></button>
+      <span class="bar-sep">/</span>
+      <span class="game-title">Your progress</span>
+    </div>
+  </div>
+  <div id="stats-body" class="stats-wrap"></div>
+</section>
+<script src="script.js" defer></script>
+</body>
+</html>
