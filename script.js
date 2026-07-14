@@ -14,7 +14,8 @@
     reaction:{title:'Reaction Time'}, stroop:{title:'Color Clash'}, odd:{title:'Odd One Out'}, chimp:{title:'Chimp Test'},
     cogstyle:{title:'Cognitive Style'}, crt:{title:'Cognitive Reflection'}, nback:{title:'N-Back'},
     slide:{title:'Slide Puzzle'}, lights:{title:'Lights Out'}, flood:{title:'Color Flood'},
-    target:{title:'Target Rush'}, mathsprint:{title:'Math Sprint'}
+    target:{title:'Target Rush'}, mathsprint:{title:'Math Sprint'},
+    flash:{title:'Flash Recall'}, palace:{title:'Memory Palace'}, spot:{title:'Spot the Difference'}, weave:{title:'Pattern Weave'}
   };
   var GAME_SECTION={
     match:'focus', sequence:'focus', schulte:'focus', words:'focus', quiz:'focus',
@@ -22,7 +23,8 @@
     reaction:'reflex', stroop:'reflex', odd:'reflex', chimp:'reflex',
     cogstyle:'mind', crt:'mind', nback:'mind',
     slide:'focus', lights:'logic', flood:'reflex',
-    target:'reflex', mathsprint:'mind'
+    target:'reflex', mathsprint:'mind',
+    flash:'focus', palace:'focus', spot:'reflex', weave:'reflex'
   };
   var lastSection='focus';
 
@@ -78,7 +80,8 @@
     reaction:'#4FB58E', stroop:'#B072C0', odd:'#33A8C0', chimp:'#E0A43A',
     cogstyle:'#B072C0', crt:'#33A8C0', nback:'#E8734F',
     slide:'#7C8CE0', lights:'#E0A43A', flood:'#33A8C0',
-    target:'#E8734F', mathsprint:'#B072C0'
+    target:'#E8734F', mathsprint:'#B072C0',
+    flash:'#E0A43A', palace:'#4FB58E', spot:'#E8734F', weave:'#B072C0'
   };
   function openGame(name){clearAllTimers(); if(!dailyPending){dailyActive=false; clearSeed();} dailyPending=false;
     homeView.hidden=true; statsView.hidden=true; gameView.hidden=false; siteHeader.hidden=true;
@@ -1140,7 +1143,11 @@
     {game:'lights',name:'Lights Out',diffs:true,mode:'min',fmt:function(v){return v+' taps';}},
     {game:'flood',name:'Color Flood',diffs:true,mode:'min',fmt:function(v){return v+' moves';}},
     {game:'target',name:'Target Rush',diffs:true,mode:'max',fmt:function(v){return v+' hits';}},
-    {game:'mathsprint',name:'Math Sprint',diffs:true,mode:'max',fmt:function(v){return v+' solved';}}
+    {game:'mathsprint',name:'Math Sprint',diffs:true,mode:'max',fmt:function(v){return v+' solved';}},
+    {game:'flash',name:'Flash Recall',diffs:true,mode:'max',fmt:function(v){return 'level '+v;}},
+    {game:'palace',name:'Memory Palace',diffs:false,mode:'max',fmt:function(v){return v+' items';}},
+    {game:'spot',name:'Spot the Difference',diffs:true,mode:'max',fmt:function(v){return v+' found';}},
+    {game:'weave',name:'Pattern Weave',diffs:true,mode:'max',fmt:function(v){return 'level '+v;}}
   ];
   function renderStats(){
     statsBody.innerHTML='';
@@ -1395,6 +1402,359 @@
     nextQ();
   }
 
+  /* ===== FLASH RECALL (rapid visual encoding) ===== */
+  var FLASH_DIFF={easy:{n:3,ms:700,start:3},medium:{n:4,ms:500,start:4},hard:{n:5,ms:350,start:5}};
+  function startFlash(){introDifficulty({title:'Flash Recall',body:"A pattern of tiles flashes for a fraction of a second, then vanishes. Tap the tiles you saw. Each level adds one tile and shortens the flash. This trains rapid visual encoding \u2014 how much you can take in from a single glance.",button:'Start',game:'flash',diffs:DIFFS3,statLabel:'Best level',statFmt:function(v){return 'level '+v;},onStart:function(d){runFlash(d);}});}
+  function runFlash(diff){
+    var cfg=FLASH_DIFF[diff]; var n=cfg.n, level=cfg.start, cleared=0;
+    function round(){
+      var total=n*n, count=Math.min(level,total-1);
+      var target={}; var picks=shuffle(Array.from({length:total},function(_,i){return i;})).slice(0,count);
+      picks.forEach(function(i){target[i]=1;});
+      stage.innerHTML='';
+      stage.appendChild(el('p','rules','Memorize the lit tiles \u2014 they vanish fast.'));
+      var grid=el('div','flash-grid'); grid.style.gridTemplateColumns='repeat('+n+',1fr)'; grid.style.width='min('+(n*72)+'px,86vw)';
+      var cells=[];
+      for(var i=0;i<total;i++){(function(i){var d=el('div','flash-cell');
+        d.addEventListener('click',function(){ if(!accepting)return; d.classList.toggle('sel'); });
+        grid.appendChild(d); cells.push(d);})(i);}
+      stage.appendChild(grid);
+      var status=el('p','status-line','Watch\u2026'); stage.appendChild(status);
+      var submit=el('button','btn-primary','Submit'); submit.disabled=true; stage.appendChild(submit);
+      gameStat.textContent='Level '+level;
+      var accepting=false;
+      picks.forEach(function(i){cells[i].classList.add('lit');});
+      after(function(){
+        picks.forEach(function(i){cells[i].classList.remove('lit');});
+        accepting=true; submit.disabled=false;
+        status.textContent='Tap the '+count+' tile'+(count>1?'s':'')+' you saw.';
+      }, cfg.ms);
+      submit.addEventListener('click',function(){
+        if(!accepting)return; accepting=false; submit.disabled=true;
+        var ok=true;
+        cells.forEach(function(d,i){
+          var sel=d.classList.contains('sel'), want=!!target[i];
+          if(sel&&want)d.classList.add('right');
+          else if(sel&&!want){d.classList.add('wrong'); ok=false;}
+          else if(!sel&&want){d.classList.add('missed'); ok=false;}
+        });
+        if(ok){cleared=level; SFX.good(); status.style.color='var(--sage)'; status.textContent='Perfect.'; level++; after(round,900);}
+        else {status.style.color='var(--rust)'; status.textContent='Not quite.'; fail();}
+      });
+    }
+    function fail(){
+      var rec=saveBest('flash',diff,cleared,'max'); bumpSolved('flash');
+      after(function(){resultScreen('Level reached',cleared||0,(cleared>=6?'Strong visual encoding.':'Glance memory improves fast with practice.')+recordNote(rec,rec?null:getBest('flash',diff),function(v){return 'level '+v;}),function(){runFlash(diff);});},1100);
+    }
+    round();
+  }
+
+  /* ===== MEMORY PALACE (method of loci) ===== */
+  var PALACE_ITEMS=['\ud83d\udd11','\ud83d\udcda','\ud83d\udd6f','\ud83c\udf4e','\u2602','\ud83e\uddf8','\u231a','\ud83d\udcf7','\ud83c\udfa9','\ud83d\udd28','\ud83e\uded6','\ud83c\udf3b'];
+  var PALACE_ROOMS=['Front door','Hallway','Kitchen','Living room','Staircase','Bedroom','Study','Balcony','Garden'];
+  function startPalace(){introSimple({title:'Memory Palace',body:"The technique every memory champion uses: walk a familiar route and leave a vivid object at each stop. Objects appear one by one along the route \u2014 then retrace it and place them back in order. Each round adds a stop.",button:'Begin the walk',game:'palace',statLabel:'Best route',statFmt:function(v){return v+' items';},onStart:runPalace});}
+  function runPalace(){
+    var route=[], cleared=0, len=3;
+    function round(){
+      route=[];
+      var rooms=shuffle(PALACE_ROOMS).slice(0,Math.min(len,PALACE_ROOMS.length));
+      var items=shuffle(PALACE_ITEMS).slice(0,rooms.length);
+      for(var i=0;i<rooms.length;i++)route.push({room:rooms[i],item:items[i]});
+      stage.innerHTML='';
+      stage.appendChild(el('p','rules','Walk the route. Picture each object vividly in its place.'));
+      var walk=el('div','palace-walk'); stage.appendChild(walk);
+      gameStat.textContent=route.length+' stops';
+      var i2=0;
+      function showStop(){
+        if(i2>=route.length){after(quiz,700); return;}
+        var s=route[i2];
+        var stop=el('div','palace-stop');
+        stop.appendChild(el('div','p-item',s.item));
+        stop.appendChild(el('div','p-room',s.room));
+        walk.appendChild(stop);
+        SFX.click(); i2++;
+        after(showStop,1150);
+      }
+      showStop();
+    }
+    function quiz(){
+      stage.innerHTML='';
+      stage.appendChild(el('h2',null,'Now walk it back'));
+      stage.appendChild(el('p','rules','Which object did you leave here?'));
+      var qi=0, ok=true;
+      function ask(){
+        if(qi>=route.length){ if(ok){cleared=route.length; SFX.good(); len++; after(round,700);} else fail(); return; }
+        var s=route[qi];
+        var body=stage.querySelector('.palace-quiz'); if(body)body.remove();
+        var box=el('div','palace-quiz');
+        box.appendChild(el('div','p-room-big',s.room));
+        var opts=el('div','palace-opts');
+        var wrong=shuffle(PALACE_ITEMS.filter(function(x){return x!==s.item;})).slice(0,3);
+        shuffle(wrong.concat([s.item])).forEach(function(it){
+          var b=el('button','palace-opt',it);
+          b.addEventListener('click',function(){
+            if(it===s.item){b.classList.add('right'); SFX.click(); qi++; after(ask,320);}
+            else {b.classList.add('wrong'); SFX.bad(); ok=false; qi++; after(ask,600);}
+          });
+          opts.appendChild(b);
+        });
+        box.appendChild(opts); stage.appendChild(box);
+        gameStat.textContent='Stop '+(qi+1)+' / '+route.length;
+      }
+      ask();
+    }
+    function fail(){
+      var rec=saveBest('palace',null,cleared,'max'); bumpSolved('palace');
+      after(function(){resultScreen('Route length',cleared||0,(cleared>=8?'You are building real palaces.':'The loci method rewards vivid, absurd imagery \u2014 the weirder the better.')+recordNote(rec,rec?null:getBest('palace',null),function(v){return v+' items';}),runPalace);},800);
+    }
+    round();
+  }
+
+  /* ===== SPOT THE DIFFERENCE ===== */
+  var SPOT_DIFF={easy:{n:4,time:60},medium:{n:5,time:60},hard:{n:6,time:50}};
+  function startSpot(){introDifficulty({title:'Spot the Difference',body:'Two grids sit side by side, identical except for a single tile. Find the odd tile and tap it. Each find brings a fresh pair \u2014 how many can you catch before the clock runs out?',button:'Start',game:'spot',diffs:DIFFS3,statLabel:'Best (found)',statFmt:function(v){return v+' found';},onStart:function(d){runSpot(d);}});}
+  function runSpot(diff){
+    var cfg=SPOT_DIFF[diff]; var n=cfg.n, score=0, timeLeft=cfg.time, combo=0;
+    var PAL=['#E0A43A','#7C8CE0','#4FB58E','#E8734F','#B072C0','#33A8C0'];
+    stage.innerHTML='';
+    stage.appendChild(el('p','rules','One tile differs between the two grids. Tap it on either side.'));
+    var pair=el('div','spot-pair'); stage.appendChild(pair);
+    var status=el('p','status-line',''); stage.appendChild(status);
+    function updateStat(){gameStat.textContent=Math.max(timeLeft,0)+'s \u00b7 '+score;}
+    updateStat();
+    var clock=every(function(){timeLeft--; updateStat(); if(timeLeft<=0)finish();},1000);
+    function round(){
+      pair.innerHTML='';
+      var total=n*n;
+      var colors=[]; for(var i=0;i<total;i++)colors.push(PAL[Math.floor(Math.random()*PAL.length)]);
+      var oddIdx=Math.floor(Math.random()*total);
+      var alt=PAL[Math.floor(Math.random()*PAL.length)];
+      var guard=0; while(alt===colors[oddIdx]&&guard<20){alt=PAL[Math.floor(Math.random()*PAL.length)]; guard++;}
+      [0,1].forEach(function(side){
+        var g=el('div','spot-grid'); g.style.gridTemplateColumns='repeat('+n+',1fr)';
+        for(var i=0;i<total;i++){(function(i){
+          var d=el('div','spot-cell');
+          d.style.background=(side===1&&i===oddIdx)?alt:colors[i];
+          d.addEventListener('click',function(){
+            if(timeLeft<=0)return;
+            if(i===oddIdx){score++; combo++; comboPop(combo,pair); updateStat(); status.style.color='var(--sage)'; status.textContent='Found it.'; round();}
+            else {combo=0; SFX.bad(); timeLeft=Math.max(0,timeLeft-3); updateStat(); d.classList.add('miss'); after(function(){d.classList.remove('miss');},260); status.style.color='var(--rust)'; status.textContent='Not that one \u2014 3s lost.';}
+          });
+          g.appendChild(d);})(i);}
+        pair.appendChild(g);
+      });
+    }
+    function finish(){clearInterval(clock);
+      var rec=saveBest('spot',diff,score,'max'); bumpSolved('spot');
+      after(function(){resultScreen('Found',score,'In '+cfg.time+' seconds.'+recordNote(rec,rec?null:getBest('spot',diff),function(v){return v+' found';}),function(){runSpot(diff);});},250);}
+    round();
+  }
+
+  /* ===== PATTERN WEAVE (visual span) ===== */
+  var WEAVE_DIFF={easy:{n:3,study:3500},medium:{n:4,study:3000},hard:{n:5,study:2600}};
+  function startWeave(){introDifficulty({title:'Pattern Weave',body:'Study a colored grid, then rebuild it from memory using the palette. Each level colors one more tile. This stretches your visual span \u2014 how much of a scene you can hold at once.',button:'Start',game:'weave',diffs:DIFFS3,statLabel:'Best level',statFmt:function(v){return 'level '+v;},onStart:function(d){runWeave(d);}});}
+  function runWeave(diff){
+    var cfg=WEAVE_DIFF[diff]; var n=cfg.n, level=3, cleared=0;
+    var PAL=['#E0A43A','#7C8CE0','#4FB58E','#E8734F','#B072C0'];
+    function round(){
+      var total=n*n, count=Math.min(level,total);
+      var idxs=shuffle(Array.from({length:total},function(_,i){return i;})).slice(0,count);
+      var target={}; idxs.forEach(function(i){target[i]=PAL[Math.floor(Math.random()*PAL.length)];});
+      stage.innerHTML='';
+      stage.appendChild(el('p','rules','Memorize the pattern.'));
+      var grid=el('div','weave-grid'); grid.style.gridTemplateColumns='repeat('+n+',1fr)'; grid.style.width='min('+(n*70)+'px,86vw)';
+      var cells=[];
+      for(var i=0;i<total;i++){var d=el('div','weave-cell'); if(target[i])d.style.background=target[i]; grid.appendChild(d); cells.push(d);}
+      stage.appendChild(grid);
+      var status=el('p','status-line','Study it\u2026'); stage.appendChild(status);
+      gameStat.textContent='Level '+level;
+      after(function(){
+        cells.forEach(function(d){d.style.background=''; d.classList.add('blank');});
+        status.textContent='Rebuild it. Pick a color, then paint the tiles.';
+        var chosen=PAL[0];
+        var pal=el('div','weave-palette');
+        PAL.forEach(function(col){var s=el('button','weave-swatch'); s.style.background=col;
+          if(col===chosen)s.classList.add('on');
+          s.addEventListener('click',function(){chosen=col; pal.querySelectorAll('.weave-swatch').forEach(function(x){x.classList.remove('on');}); s.classList.add('on');});
+          pal.appendChild(s);});
+        stage.insertBefore(pal, status);
+        var painted={};
+        cells.forEach(function(d,i){d.addEventListener('click',function(){
+          if(painted[i]===chosen){delete painted[i]; d.style.background=''; return;}
+          painted[i]=chosen; d.style.background=chosen; SFX.click();});});
+        var submit=el('button','btn-primary','Submit'); stage.appendChild(submit);
+        submit.addEventListener('click',function(){
+          submit.disabled=true;
+          var ok=true;
+          for(var i=0;i<total;i++){ if((target[i]||null)!==(painted[i]||null)){ok=false; break;} }
+          if(ok){cleared=level; SFX.good(); status.style.color='var(--sage)'; status.textContent='Woven perfectly.'; level++; after(round,900);}
+          else {status.style.color='var(--rust)'; status.textContent='Not quite \u2014 here was the pattern.';
+            cells.forEach(function(d,i){d.style.background=target[i]||''; if(target[i])d.classList.add('reveal');});
+            fail();}
+        });
+      }, cfg.study);
+    }
+    function fail(){
+      var rec=saveBest('weave',diff,cleared,'max'); bumpSolved('weave');
+      after(function(){resultScreen('Level reached',cleared||0,'Visual span grows with practice.'+recordNote(rec,rec?null:getBest('weave',diff),function(v){return 'level '+v;}),function(){runWeave(diff);});},1500);
+    }
+    round();
+  }
+
+  /* =========================================================
+     DAILY LEADERBOARD (optional serverless backend)
+     Set API_BASE to your Cloudflare Worker URL to enable.
+     With no backend it degrades to a local-only personal log.
+     ========================================================= */
+  var API_BASE=''; /* e.g. 'https://aperture-daily.<you>.workers.dev' */
+  function playerName(){
+    var n=store.get('player:name',null);
+    if(!n){ n='Player'+Math.floor(1000+Math.random()*9000); store.set('player:name',n); }
+    return n;
+  }
+  function setPlayerName(n){ n=(n||'').trim().slice(0,16); if(n)store.set('player:name',n); }
+  function dailyKey(){ return dstr(new Date()); }
+
+  function lbSubmit(seconds){
+    var entry={name:playerName(), secs:Math.round(seconds), game:todaysGame(), day:dailyKey()};
+    /* always keep a local record */
+    var mine=store.get('daily:mine',{}); mine[dailyKey()]=entry; store.set('daily:mine',mine);
+    if(!API_BASE) return Promise.resolve(null);
+    return fetch(API_BASE+'/submit',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(entry)})
+      .then(function(r){return r.ok?r.json():null;}).catch(function(){return null;});
+  }
+  function lbFetch(){
+    if(!API_BASE) return Promise.resolve(null);
+    return fetch(API_BASE+'/board?day='+encodeURIComponent(dailyKey()))
+      .then(function(r){return r.ok?r.json():null;}).catch(function(){return null;});
+  }
+  function showLeaderboard(mySecs){
+    var box=el('div','lb-box');
+    box.appendChild(el('div','lb-title','Today\u2019s Daily \u00b7 '+GAME_META[todaysGame()].title));
+    var body=el('div','lb-body'); box.appendChild(body);
+    body.appendChild(el('p','status-line','Loading board\u2026'));
+    stage.appendChild(box);
+    lbFetch().then(function(data){
+      body.innerHTML='';
+      if(!data||!data.top){
+        var mine=store.get('daily:mine',{});
+        var days=Object.keys(mine).sort().reverse().slice(0,5);
+        body.appendChild(el('p','lb-note','Global board is offline \u2014 here is your own daily history.'));
+        var list=el('div','lb-list');
+        days.forEach(function(d){
+          var e=mine[d]; var rowx=el('div','lb-row'+(d===dailyKey()?' me':''));
+          rowx.appendChild(el('span','lb-rank',d===dailyKey()?'Today':d));
+          rowx.appendChild(el('span','lb-name',GAME_META[e.game]?GAME_META[e.game].title:e.game));
+          rowx.appendChild(el('span','lb-score',fmtTime(e.secs)));
+          list.appendChild(rowx);
+        });
+        body.appendChild(list);
+        return;
+      }
+      var list=el('div','lb-list');
+      data.top.forEach(function(e,i){
+        var rowx=el('div','lb-row'+(e.name===playerName()?' me':''));
+        rowx.appendChild(el('span','lb-rank','#'+(i+1)));
+        rowx.appendChild(el('span','lb-name',e.name));
+        rowx.appendChild(el('span','lb-score',fmtTime(e.secs)));
+        list.appendChild(rowx);
+      });
+      body.appendChild(list);
+      var meta=el('p','lb-note','');
+      meta.textContent=(data.rank?('You placed #'+data.rank+' of '+data.total+' today.'):(data.total+' players solved it today.'));
+      body.appendChild(meta);
+      var rename=el('button','btn-ghost','Change name');
+      rename.addEventListener('click',function(){
+        var n=window.prompt('Name shown on the daily board (max 16 chars):',playerName());
+        if(n){setPlayerName(n); lbSubmit(mySecs).then(function(){stage.querySelector('.lb-box').remove(); showLeaderboard(mySecs);});}
+      });
+      body.appendChild(rename);
+    });
+  }
+
+  /* =========================================================
+     SHARE CARDS — canvas-drawn result image
+     ========================================================= */
+  var SHARE_URL=(location.origin&&location.origin.indexOf('http')===0)?(location.origin+location.pathname):'';
+  function roundRect(g,x,y,w,h,r){g.beginPath(); g.moveTo(x+r,y); g.arcTo(x+w,y,x+w,y+h,r); g.arcTo(x+w,y+h,x,y+h,r); g.arcTo(x,y+h,x,y,r); g.arcTo(x,y,x+w,y,r); g.closePath();}
+  function drawShareCard(opts){
+    /* 1080x1080 — works as a WhatsApp/IG post; IG Stories crops gracefully */
+    var W=1080,H=1080;
+    var cv=document.createElement('canvas'); cv.width=W; cv.height=H;
+    var g=cv.getContext('2d'); if(!g)return null;
+    var accent=opts.accent||'#E0A43A';
+    /* background */
+    g.fillStyle='#12151C'; g.fillRect(0,0,W,H);
+    /* accent glow */
+    var grd=g.createRadialGradient(W*0.78,H*0.16,20,W*0.78,H*0.16,W*0.72);
+    grd.addColorStop(0,accent); grd.addColorStop(1,'rgba(18,21,28,0)');
+    g.globalAlpha=0.28; g.fillStyle=grd; g.fillRect(0,0,W,H); g.globalAlpha=1;
+    var grd2=g.createRadialGradient(W*0.12,H*0.92,20,W*0.12,H*0.92,W*0.6);
+    grd2.addColorStop(0,accent); grd2.addColorStop(1,'rgba(18,21,28,0)');
+    g.globalAlpha=0.16; g.fillStyle=grd2; g.fillRect(0,0,W,H); g.globalAlpha=1;
+    /* card panel */
+    g.fillStyle='rgba(27,32,48,0.86)'; roundRect(g,80,150,W-160,H-380,36); g.fill();
+    g.strokeStyle='rgba(255,255,255,0.10)'; g.lineWidth=2; g.stroke();
+    /* accent cap */
+    g.fillStyle=accent; roundRect(g,80,150,W-160,10,6); g.fill();
+    /* aperture mark */
+    g.strokeStyle=accent; g.lineWidth=4;
+    g.beginPath(); g.arc(W/2,255,42,0,Math.PI*2); g.stroke();
+    g.setLineDash([7,9]); g.beginPath(); g.arc(W/2,255,26,0,Math.PI*2); g.stroke(); g.setLineDash([]);
+    g.fillStyle=accent; g.beginPath(); g.arc(W/2,255,8,0,Math.PI*2); g.fill();
+    /* game name */
+    g.textAlign='center'; g.fillStyle='#ECEBE5';
+    g.font='600 46px Georgia, serif';
+    g.fillText(opts.game||'Aperture', W/2, 375);
+    /* label */
+    g.fillStyle='#9AA0B8'; g.font='500 26px "Courier New", monospace';
+    g.fillText((opts.label||'').toUpperCase(), W/2, 440);
+    /* big value */
+    g.fillStyle=accent; g.font='700 152px "Courier New", monospace';
+    g.fillText(String(opts.value||''), W/2, 600);
+    /* title / record tag */
+    if(opts.title){
+      var tw=g.measureText(opts.title).width;
+      g.font='600 30px "Courier New", monospace';
+      tw=g.measureText(opts.title.toUpperCase()).width;
+      g.strokeStyle=accent; g.lineWidth=2;
+      roundRect(g,W/2-tw/2-28,640,tw+56,60,30); g.stroke();
+      g.fillStyle=accent; g.fillText(opts.title.toUpperCase(), W/2, 680);
+    }
+    /* record banner */
+    if(opts.record){
+      g.fillStyle='#E0A43A'; g.font='600 32px "Courier New", monospace';
+      g.fillText('\u2605  NEW PERSONAL BEST  \u2605', W/2, 760);
+    }
+    /* difficulty */
+    if(opts.diff){
+      g.fillStyle='#9AA0B8'; g.font='500 26px "Courier New", monospace';
+      g.fillText(opts.diff.toUpperCase()+' MODE', W/2, opts.record?815:775);
+    }
+    /* footer */
+    g.fillStyle='#ECEBE5'; g.font='600 40px Georgia, serif';
+    g.fillText('Aperture', W/2, H-150);
+    g.fillStyle='#9AA0B8'; g.font='500 24px "Courier New", monospace';
+    g.fillText(SHARE_URL?SHARE_URL.replace(/^https?:\/\//,''):'Free brain training \u00b7 no limits', W/2, H-100);
+    return cv;
+  }
+  function shareResult(opts){
+    var cv=drawShareCard(opts); if(!cv)return;
+    var caption=(opts.record?'New personal best on ':'My score on ')+(opts.game||'Aperture')+': '+opts.value+(opts.label?(' '+opts.label.toLowerCase()):'')+'. '+(SHARE_URL||'');
+    cv.toBlob(function(blob){
+      if(!blob)return;
+      var file=null;
+      try{file=new File([blob],'aperture-result.png',{type:'image/png'});}catch(e){}
+      if(file&&navigator.canShare&&navigator.canShare({files:[file]})&&navigator.share){
+        navigator.share({files:[file],text:caption}).catch(function(){});
+      } else {
+        var url=URL.createObjectURL(blob);
+        var a=document.createElement('a'); a.href=url; a.download='aperture-result.png'; document.body.appendChild(a); a.click();
+        document.body.removeChild(a); setTimeout(function(){URL.revokeObjectURL(url);},2000);
+      }
+    },'image/png');
+  }
+
   /* =========================================================
      PLAYFUL LAYER: sound, confetti, titles, facts, daily, home
      ========================================================= */
@@ -1456,7 +1816,11 @@
     lights:{mode:'min',tiers:[[8,'Switch Whisperer'],[14,'Circuit Bender'],[22,'Dimmer']]},
     flood:{mode:'min',tiers:[[16,'Tsunami'],[22,'Wave Rider'],[28,'Splasher']]},
     target:{mode:'max',tiers:[[30,'Sharpshooter'],[20,'Deadeye'],[12,'Warmed Up']]},
-    mathsprint:{mode:'max',tiers:[[26,'Human Calculator'],[18,'Number Cruncher'],[10,'Counting Up']]}
+    mathsprint:{mode:'max',tiers:[[26,'Human Calculator'],[18,'Number Cruncher'],[10,'Counting Up']]},
+    flash:{mode:'max',tiers:[[9,'Camera Eye'],[7,'Snapshot'],[5,'Quick Glance']]},
+    palace:{mode:'max',tiers:[[12,'Grandmaster of Memory'],[9,'Palace Builder'],[6,'Route Walker']]},
+    spot:{mode:'max',tiers:[[12,'Nothing Escapes You'],[8,'Fine-Toothed'],[5,'Observant']]},
+    weave:{mode:'max',tiers:[[8,'Perfect Recall'],[6,'Wide Span'],[4,'Steady Eye']]}
   };
   function titleFor(game,val){var t=TITLES[game]; if(!t||isNaN(val))return null;
     for(var i=0;i<t.tiers.length;i++){var th=t.tiers[i]; if(t.mode==='min'?val<=th[0]:val>=th[0])return th[1];} return null;}
@@ -1497,6 +1861,22 @@
     /* brain fact */
     var fact=el('p','brain-fact'); fact.innerHTML=BRAIN_FACTS[Math.floor(Math.random()*BRAIN_FACTS.length)];
     panel.insertBefore(fact, panel.querySelector('.btn-row'));
+    /* share button */
+    var row=panel.querySelector('.btn-row');
+    var shareBtn=el('button','btn-share'+(isRecord?' hot':''), isRecord?'\u2605 Share your record':'Share result');
+    shareBtn.addEventListener('click',function(){
+      SFX.click();
+      shareResult({game:GAME_META[game]?GAME_META[game].title:'Aperture', label:label, value:value,
+        title:title, record:isRecord, accent:GAME_ACCENT[game]||'#E0A43A',
+        diff:store.get('diff:'+game,null)});
+    });
+    if(row)panel.insertBefore(shareBtn,row);
+    /* daily: submit time + show leaderboard */
+    if(dailyActive&&game===todaysGame()){
+      var secs=NaN; var mt=String(value).match(/^(\d+):(\d\d)$/);
+      if(mt)secs=parseInt(mt[1],10)*60+parseInt(mt[2],10);
+      if(!isNaN(secs)){ lbSubmit(secs); after(function(){showLeaderboard(secs);},420); }
+    }
     /* celebrate */
     if(isRecord){confetti(); SFX.record();} else {SFX.solve();}
   };
@@ -1586,7 +1966,7 @@
   /* ---- card motifs + 3D tilt ---- */
   var CARD_MOTIF={match:'\u2726', sequence:'\u25CE', schulte:'\u2316', words:'\u270E', quiz:'\u2605',
     tango:'\u2600', queens:'\u265B', zip:'\u26A1', sudoku:'\u2685', pinpoint:'\u25C9',
-    reaction:'\u26A1', stroop:'\u25D0', odd:'\u25A3', chimp:'\u2318', cogstyle:'\u262F', crt:'\u203D', nback:'\u29BF', slide:'\u25A6', lights:'\u2600', flood:'\u25C9', target:'\u25CE', mathsprint:'\u2211'};
+    reaction:'\u26A1', stroop:'\u25D0', odd:'\u25A3', chimp:'\u2318', cogstyle:'\u262F', crt:'\u203D', nback:'\u29BF', slide:'\u25A6', lights:'\u2600', flood:'\u25C9', target:'\u25CE', mathsprint:'\u2211', flash:'\u26A1', palace:'\u2302', spot:'\u25D1', weave:'\u2593'};
   function initMotifs(){
     document.querySelectorAll('.chamber-card').forEach(function(card){
       var m=CARD_MOTIF[card.dataset.game]; if(!m)return;
@@ -1635,7 +2015,8 @@
     reaction:startReaction, stroop:startStroop, odd:startOdd, chimp:startChimp,
     cogstyle:startCogstyle, crt:startCrt, nback:startNback,
     slide:startSlide, lights:startLights, flood:startFlood,
-    target:startTarget, mathsprint:startMathsprint
+    target:startTarget, mathsprint:startMathsprint,
+    flash:startFlash, palace:startPalace, spot:startSpot, weave:startWeave
   };
 
   /* ---- boot the playful layer ---- */
