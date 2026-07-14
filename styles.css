@@ -561,3 +561,63 @@ html[data-theme="light"] body::after{background:radial-gradient(circle, rgba(176
 .math-opt:active{transform:scale(.95);}
 .math-opt.m-good{background:var(--sage); border-color:var(--sage); color:#12151C;}
 .math-opt.m-bad{background:color-mix(in srgb, var(--rust) 30%, var(--ink-panel)); border-color:var(--rust); animation:shake .3s;}
+
+/* ---- Flash Recall ---- */
+.flash-grid{display:grid; gap:10px;}
+.flash-cell{aspect-ratio:1; background:var(--ink-panel); border:1px solid var(--hair); border-radius:12px; cursor:pointer; transition:background .08s, transform .08s, box-shadow .1s;}
+.flash-cell:active{transform:scale(.94);}
+.flash-cell.lit{background:var(--game-accent); border-color:var(--game-accent); box-shadow:0 0 30px -4px var(--game-accent);}
+.flash-cell.sel{background:color-mix(in srgb, var(--game-accent) 45%, var(--ink-panel)); border-color:var(--game-accent);}
+.flash-cell.right{background:var(--sage); border-color:var(--sage);}
+.flash-cell.wrong{background:var(--rust); border-color:var(--rust);}
+.flash-cell.missed{border-color:var(--periwinkle); box-shadow:inset 0 0 0 3px var(--periwinkle);}
+
+/* ---- Memory Palace ---- */
+.palace-walk{display:flex; flex-wrap:wrap; gap:12px; justify-content:center; max-width:640px;}
+.palace-stop{background:var(--ink-panel); border:1px solid var(--hair); border-top:3px solid var(--game-accent); border-radius:14px; padding:14px 18px; display:flex; flex-direction:column; align-items:center; gap:6px; animation:pop .35s ease; box-shadow:var(--card-shadow);}
+.palace-stop .p-item{font-size:2rem;}
+.palace-stop .p-room{font-family:var(--mono); font-size:.72rem; color:var(--muted); text-transform:uppercase; letter-spacing:.06em;}
+.palace-quiz{display:flex; flex-direction:column; align-items:center; gap:16px; animation:pop .3s ease;}
+.p-room-big{font-family:var(--display); font-size:1.8rem; color:var(--game-accent);}
+.palace-opts{display:grid; grid-template-columns:repeat(4,1fr); gap:12px;}
+.palace-opt{font-size:2rem; background:var(--ink-panel); border:1px solid var(--hair); border-radius:14px; padding:14px 18px; cursor:pointer; transition:transform .08s, border-color .12s;}
+.palace-opt:hover{border-color:var(--game-accent);}
+.palace-opt:active{transform:scale(.94);}
+.palace-opt.right{border-color:var(--sage); background:color-mix(in srgb, var(--sage) 22%, var(--ink-panel));}
+.palace-opt.wrong{border-color:var(--rust); background:color-mix(in srgb, var(--rust) 22%, var(--ink-panel)); animation:shake .35s;}
+
+/* ---- Spot the Difference ---- */
+.spot-pair{display:flex; gap:22px; flex-wrap:wrap; justify-content:center;}
+.spot-grid{display:grid; gap:5px; background:var(--hair); padding:6px; border-radius:14px; width:min(240px,42vw);}
+.spot-cell{aspect-ratio:1; border-radius:7px; cursor:pointer; transition:transform .07s;}
+.spot-cell:hover{transform:scale(1.06);}
+.spot-cell.miss{outline:3px solid var(--rust); outline-offset:-3px; animation:shake .3s;}
+
+/* ---- Pattern Weave ---- */
+.weave-grid{display:grid; gap:8px;}
+.weave-cell{aspect-ratio:1; background:var(--ink-panel); border:1px solid var(--hair); border-radius:10px; transition:background .1s, transform .08s;}
+.weave-cell.blank{cursor:pointer;}
+.weave-cell.blank:active{transform:scale(.94);}
+.weave-cell.reveal{box-shadow:0 0 0 2px var(--paper);}
+.weave-palette{display:flex; gap:10px; justify-content:center;}
+.weave-swatch{width:42px; height:42px; border-radius:50%; border:2px solid var(--hair); cursor:pointer; transition:transform .1s, border-color .12s;}
+.weave-swatch:hover{transform:scale(1.1);}
+.weave-swatch.on{border-color:var(--paper); transform:scale(1.15); box-shadow:0 0 16px -2px currentColor;}
+
+/* ---- share button ---- */
+.btn-share{background:none; border:1px solid var(--game-accent); color:var(--game-accent); border-radius:999px; padding:12px 26px; font-family:var(--mono); font-size:.78rem; letter-spacing:.05em; text-transform:uppercase; cursor:pointer; transition:transform .12s, background .15s;}
+.btn-share:hover{background:color-mix(in srgb, var(--game-accent) 14%, transparent);}
+.btn-share:active{transform:scale(.96);}
+.btn-share.hot{background:var(--game-accent); color:#12151C; font-weight:600; box-shadow:0 8px 24px -8px var(--game-accent); animation:sharepulse 1.8s ease-in-out infinite;}
+@keyframes sharepulse{0%,100%{transform:scale(1);}50%{transform:scale(1.04);}}
+
+/* ---- daily leaderboard ---- */
+.lb-box{background:var(--ink-panel); border:1px solid var(--hair); border-top:3px solid var(--game-accent); border-radius:18px; padding:22px 24px; width:min(440px,92vw); box-shadow:var(--card-shadow); animation:pop .35s ease;}
+.lb-title{font-family:var(--display); font-size:1.15rem; margin-bottom:14px; color:var(--paper);}
+.lb-list{display:flex; flex-direction:column; gap:6px; margin-bottom:12px;}
+.lb-row{display:grid; grid-template-columns:52px 1fr auto; align-items:center; gap:10px; padding:9px 12px; border-radius:10px; background:var(--ink-panel-2); font-family:var(--mono); font-size:.85rem;}
+.lb-row.me{background:color-mix(in srgb, var(--game-accent) 18%, var(--ink-panel-2)); box-shadow:inset 0 0 0 1px var(--game-accent);}
+.lb-rank{color:var(--muted); font-size:.78rem;}
+.lb-name{text-align:left; color:var(--paper); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+.lb-score{color:var(--game-accent); font-weight:600;}
+.lb-note{color:var(--muted); font-size:.8rem; margin-bottom:10px;}
